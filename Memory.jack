@@ -5,28 +5,34 @@
 
 /**
  * Memory operations library.
- */ 
+ */
 class Memory {
+	static Array memoryStart;
 
-    /** Initializes memory parameters. */
-    function void init() {
-    }
+	/** Initializes memory parameters. */
+	function void init() {
+		let memoryStart = 0;
+		return;
+	}
 
-    /** Returns the value of the main memory at the given address. */
-    function int peek(int address) {
-    }
+	/** Returns the value of the main memory at the given address. */
+	function int peek(int address) {
+		return memoryStart[address];
+	}
 
-    /** Sets the value of the main memory at this address
-     *  to the given value. */
-    function void poke(int address, int value) {
-    }
+	/** Sets the value of the main memory at this address
+	 *  to the given value. */
+	function void poke(int address, int value) {
+		let memoryStart[address] = value;
+		return;
+	}
 
-    /** finds and allocates from the heap a memory block of the 
-     *  specified size and returns a reference to its base address. */
-    function int alloc(int size) {
-    }
+	/** finds and allocates from the heap a memory block of the
+	 *  specified size and returns a reference to its base address. */
+	function int alloc(int size) {
+	}
 
-    /** De-allocates the given object and frees its space. */
-    function void deAlloc(int object) {
-    }    
+	/** De-allocates the given object and frees its space. */
+	function void deAlloc(int object) {
+	}
 }

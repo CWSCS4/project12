@@ -7,32 +7,97 @@
  * A basic math library.
  */
 class Math {
+	static Array bitmasks;
 
-    /** Initializes the library. */
-    function void init() {
-    }
+	/** Initializes the library. */
+	function void init() {
+		var int bit, bitmask;
 
-    /** Returns the absolute value of x. */
-    function int abs(int x) {
-    }
+		let bitmasks = Array.new(8);
+		let bitmask = 1;
+		while (bit < 8) {
+			let bitmasks[bit] = bitmask;
 
-    /** Returns the product of x and y. */
-    function int multiply(int x, int y) {
-    }
+			let bit = bit + 1;
+			let bitmask = bitmask + bitmask;
+		}
+		return;
+	}
 
-    /** Returns the integer part of x/y. */
-    function int divide(int x, int y) {
-    }
+	/** Returns the absolute value of x. */
+	function int abs(int x) {
+		if (x < 0) { return -x; }
+		return x;
+	}
 
-    /** Returns the integer part of the square root of x. */
-    function int sqrt(int x) {
-    }
+	/** Returns the product of x and y. */
+	function int multiply(int x, int y) {
+		var int sum;
+		var int bit, bitmask;
 
-    /** Returns the greater number. */
-    function int max(int a, int b) {
-    }
+		let bitmask = 1;
+		while (bit < 16) {
+			if (y & bitmask) {
+				let sum = sum + x;
+			}
 
-    /** Returns the smaller number. */
-    function int min(int a, int b) {
-    }
+			let bit = bit + 1;
+			let bitmask = bitmask + bitmask;
+			let x = x + x;
+		}
+
+		return sum;
+	}
+
+	/** Returns the integer part of x/y. */
+	function int divide(int x, int y) {
+		var int q;
+		var int qy;
+
+		if (y > x) { return 0; }
+
+		let q = Math.divide(x, y + y);
+		let qy = q * y;
+		if ((x - (qy + qy)) < y) {
+			return q + q;
+		}
+		else {
+			return q + q + 1;
+		}
+	}
+
+	/** Returns the integer part of the square root of x. */
+	function int sqrt(int x) {
+		var int bit, bitmask;
+		var int root, newRoot;
+
+		let bit = 7; //16/2 - 1
+		while (bit) {
+			let bitmask = bitmasks[bit];
+			let newRoot = root + bitmask;
+			if (~((newRoot * newRoot) > x)) {
+				let root = newRoot;
+			}
+
+			let bit = bit - 1;
+		}
+
+		return root;
+	}
+
+	/** Returns the greater number. */
+	function int max(int a, int b) {
+		if (a > b) { return a; }
+		return b;
+	}
+
+	/** Returns the smaller number. */
+	function int min(int a, int b) {
+		if (a < b) { return a; }
+		return b;
+	}
+
+	function int mod(int a, int b) {
+		return a - (b * (a / b));
+	}
 }
