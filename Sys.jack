@@ -7,15 +7,19 @@
  * A library of basic system services.
  */
 class Sys {
+	static String ERR;
 
 	/** Performs all the initializations required by the OS. */
 	function void init() {
+		do Memory.init();
 		do Keyboard.init();
 		do Math.init();
-		do Memory.init();
 		do Output.init();
 		do Screen.init();
-		return;
+		let ERR = "ERR";
+		do Main.main();
+		do Sys.halt();
+		return; //unreachable
 	}
 
 	/** Halts execution. */
@@ -31,6 +35,8 @@ class Sys {
 
 	/** Prints the given error code in the form "ERR<errorCode>", and halts. */
 	function void error(int errorCode) {
+		//do Output.printString(ERR);
+		do Output.printInt(errorCode);
 		do Sys.halt();
 		return; //unreachable
 	}

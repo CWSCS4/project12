@@ -55,6 +55,8 @@ class Memory {
 
 		let segment = firstSegment;
 		while (segment) {
+			do Output.printInt(segment);
+			do Output.println();
 			let length = Memory.getLength(segment);
 			if (~(length < size)) {
 				let lostSize = size + 2;

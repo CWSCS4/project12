@@ -10,12 +10,15 @@ class Array {
 
 	/** Constructs a new Array of the given size. */
 	function Array new(int size) {
-		return Memory.alloc(size);
+		if (~size) { return null; } //skip calling alloc with 0 words
+		else { return Memory.alloc(size); }
 	}
 
 	/** De-allocates the array and frees its space. */
 	method void dispose() {
-		do Memory.deAlloc(this);
+		if (~(this = null)) {
+			do Memory.deAlloc(this);
+		}
 		return;
 	}
 }

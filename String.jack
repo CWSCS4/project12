@@ -20,6 +20,7 @@ class String {
 	/** De-allocates the string and frees its space. */
 	method void dispose() {
 		do chars.dispose();
+		do Memory.deAlloc(this);
 		return;
 	}
 
@@ -42,7 +43,7 @@ class String {
 	/** Appends the character c to the end of this String.
 	 *  Returns this string as the return value. */
 	method String appendChar(char c) {
-		let chars[length] = 0;
+		let chars[length] = c;
 		let length = length + 1;
 		return this;
 	}
@@ -74,7 +75,7 @@ class String {
 
 		let lastDigit = Math.mod(number, 10);
 		if (lastDigit < 10) {
-			let string = String.new(6); //-32768
+			let string = String.new(5); //32767
 			do string.appendChar(lastDigit + 48);
 			return string;
 		}
@@ -86,17 +87,30 @@ class String {
 
 	/** Sets this String to hold a representation of the given number. */
 	method void setInt(int number) {
+		var boolean negative;
 		var String string;
 		var int i;
 
+		let negative = number < 0;
+		if (negative) { let number = -number; }
+
 		let string = String.intToString(number);
-		let length = string.length();
-		while (i < length) {
-			let chars[i] = string.charAt(i);
-
-			let i = i + 1;
+		if (negative) {
+			let chars[0] = 45;
+			let i = 1;
+			let length = string.length() + 1;
+			while (i < length) {
+				let chars[i] = string.charAt(i - 1);
+				let i = i + 1;
+			}
 		}
-
+		else {
+			let length = string.length();
+			while (i < length) {
+				let chars[i] = string.charAt(i);
+				let i = i + 1;
+			}
+		}
 		return;
 	}
 
