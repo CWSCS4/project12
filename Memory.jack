@@ -7,11 +7,30 @@
  * Memory operations library.
  */
 class Memory {
+	static Array firstSegment;
 	static Array memoryStart;
+
+	function void setLength(Array segment, int length) {
+		let segment[-2] = length;
+		return;
+	}
+	function void setNext(Array segment, Array nextSegment) {
+		let segment[-1] = nextSegment;
+		return;
+	}
+	function int getLength(Array segment) {
+		return segment[-2];
+	}
+	function Array getNext(Array segment) {
+		return segment[-1];
+	}
 
 	/** Initializes memory parameters. */
 	function void init() {
 		let memoryStart = 0;
+		let firstSegment = 2050;
+		do Memory.setLength(firstSegment, 16384 - 2050);
+		do Memory.setNext(firstSegment, null);
 		return;
 	}
 
@@ -30,9 +49,48 @@ class Memory {
 	/** finds and allocates from the heap a memory block of the
 	 *  specified size and returns a reference to its base address. */
 	function int alloc(int size) {
+		var Array previousSegment, segment, nextSegment;
+		var int length;
+		var int lostSize;
+
+		let segment = firstSegment;
+		while (segment) {
+			let length = Memory.getLength(segment);
+			if (~(length < size)) {
+				let lostSize = size + 2;
+				let nextSegment = segment + lostSize;
+				do Memory.setLength(nextSegment, length - lostSize);
+				do Memory.setNext(nextSegment, Memory.getNext(segment));
+				do Memory.setLength(segment, size);
+				if (previousSegment) {
+					do Memory.setNext(previousSegment, nextSegment);
+				}
+				else { //segment is the first segment
+					let firstSegment = nextSegment;
+				}
+				return segment;
+			}
+
+			let previousSegment = segment;
+			let segment = Memory.getNext(segment);
+		}
+		do Sys.error(6);
+		return null;
 	}
 
 	/** De-allocates the given object and frees its space. */
-	function void deAlloc(int object) {
+	function void deAlloc(Array insertSegment) {
+		var Array previousSegment, segment;
+		var int length;
+
+		let length = Memory.getLength(insertSegment);
+		let segment = firstSegment;
+		while (segment & (Memory.getLength(segment) < length)) {
+			let previousSegment = segment;
+			let segment = Memory.getNext(segment);
+		}
+		do Memory.setNext(previousSegment, insertSegment);
+		do Memory.setNext(insertSegment, segment);
+		return;
 	}
 }

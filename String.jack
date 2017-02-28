@@ -68,43 +68,50 @@ class String {
 		return value;
 	}
 
+	function String intToString(int number) {
+		var int lastDigit;
+		var String string;
+
+		let lastDigit = Math.mod(number, 10);
+		if (lastDigit < 10) {
+			let string = String.new(6); //-32768
+			do string.appendChar(lastDigit + 48);
+			return string;
+		}
+		else {
+			let string = String.intToString(number / 10);
+			return string.appendChar(lastDigit + 48);
+		}
+	}
+
 	/** Sets this String to hold a representation of the given number. */
 	method void setInt(int number) {
-		var int numbersStart, reverseIndex, maxReverseIndex;
-		var int switchingIndex;
-		var char tempChar;
+		var String string;
+		var int i;
 
-		let length = 0;
-		if (number < 0) {
-			do appendChar(45);
-			let number = -number;
-			let numbersStart = 1;
+		let string = String.intToString(number);
+		let length = string.length();
+		while (i < length) {
+			let chars[i] = string.charAt(i);
+
+			let i = i + 1;
 		}
-		while (number > 0) {
-			do appendChar(Math.mod(number, 10));
-			let number = number / 10;
-		}
-		let reverseIndex = numbersStart;
-		let maxReverseIndex = numbersStart + ((length - numbersStart) / 2);
-		while (reverseIndex < maxReverseIndex) {
-			let switchingIndex = (length - 1 - reverseIndex) + numbersStart;
-			let tempChar = chars[reverseIndex];
-			let chars[reverseIndex] = chars[switchingIndex];
-			let chars[switchingIndex] = tempChar;
-			let reverseIndex = reverseIndex + 1;
-		}
+
 		return;
 	}
 
 	/** Returns the new line character. */
 	function char newLine() {
+		return 128;
 	}
 
 	/** Returns the backspace character. */
 	function char backSpace() {
+		return 129;
 	}
 
 	/** Returns the double quote (") character. */
 	function char doubleQuote() {
+		return 34;
 	}
 }

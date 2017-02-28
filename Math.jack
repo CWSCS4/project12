@@ -13,15 +13,19 @@ class Math {
 	function void init() {
 		var int bit, bitmask;
 
-		let bitmasks = Array.new(8);
+		let bitmasks = Array.new(16);
 		let bitmask = 1;
-		while (bit < 8) {
+		while (bit < 16) {
 			let bitmasks[bit] = bitmask;
 
 			let bit = bit + 1;
 			let bitmask = bitmask + bitmask;
 		}
 		return;
+	}
+
+	function int getBitmask(int bit) {
+		return bitmasks[bit];
 	}
 
 	/** Returns the absolute value of x. */
@@ -99,5 +103,11 @@ class Math {
 
 	function int mod(int a, int b) {
 		return a - (b * (a / b));
+	}
+
+	function int sgn(int a) {
+		if (a < 0) { return -1; }
+		if (a > 0) { return 1; }
+		return 0;
 	}
 }
