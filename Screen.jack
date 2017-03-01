@@ -58,20 +58,25 @@ class Screen {
 		var int dx, dy;
 		var int sx, sy;
 		var int a, b;
+		var int x, y;
 		var int aDyMinusBDx;
 
 		let dx = Math.abs(x2 - x1);
 		let dy = Math.abs(y2 - y1);
 		let sx = Math.sgn(x2 - x1);
 		let sy = Math.sgn(y2 - y1);
-		while (~((a > dx) | (b > dy))) {
-			do Screen.drawPixel(x1 + a * sx, y1 + b * sy);
+		let x = x1;
+		let y = y1;
+		while ((a < dx) | (b < dy)) {
+			do Screen.drawPixel(x, y);
 			if (aDyMinusBDx < 0) { //a/dx < b/dy
 				let a = a + 1;
+				let x = x + sx;
 				let aDyMinusBDx = aDyMinusBDx + dy;
 			}
 			else {
 				let b = b + 1;
+				let y = y + sy;
 				let aDyMinusBDx = aDyMinusBDx - dx;
 			}
 		}
@@ -103,14 +108,16 @@ class Screen {
 	function void drawCircle(int cx, int cy, int r) {
 		var int rSquared;
 		var int x, y;
+		var int relativeX;
 		var int maxX, maxY;
 		var int h;
 
 		let rSquared = r * r;
 		let x = cx - r;
+		let relativeX = -r;
 		let maxX = cx + r + 1;
 		while (x < maxX) {
-			let h = Math.sqrt(rSquared - (x * x));
+			let h = Math.sqrt(rSquared - (relativeX * relativeX));
 			let y = cy - h;
 			let maxY = cy + h + 1;
 			while (y < maxY) {
@@ -119,6 +126,7 @@ class Screen {
 			}
 
 			let x = x + 1;
+			let relativeX = relativeX + 1;
 		}
 		return;
 	}

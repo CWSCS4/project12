@@ -57,15 +57,28 @@ class String {
 	/** Returns the integer value of this String until the first non
 	 *  numeric character. */
 	method int intValue() {
+		var boolean negative;
 		var int i;
 		var int value;
+		var int digit;
+
+		if (chars[0] = 45 /*'-'*/) {
+			let i = 1;
+			let negative = true;
+		}
+		else { let negative = false; }
 
 		while (i < length) {
-			let value = value * 10 + (chars[i] - 48);
-
-			let i = i + 1;
+			let digit = chars[i] - 48;
+			if ((digit < 0) | (digit > 9)) { //non-numeric character
+				let i = length; //break;
+			}
+			else {
+				let value = value * 10 + digit;
+				let i = i + 1;
+			}
 		}
-
+		if (negative) { let value = -value; }
 		return value;
 	}
 
@@ -73,13 +86,13 @@ class String {
 		var int lastDigit;
 		var String string;
 
-		let lastDigit = Math.mod(number, 10);
-		if (lastDigit < 10) {
+		if (number < 10) {
 			let string = String.new(5); //32767
-			do string.appendChar(lastDigit + 48);
+			do string.appendChar(number + 48);
 			return string;
 		}
 		else {
+			let lastDigit = Math.mod(number, 10);
 			let string = String.intToString(number / 10);
 			return string.appendChar(lastDigit + 48);
 		}
@@ -96,7 +109,7 @@ class String {
 
 		let string = String.intToString(number);
 		if (negative) {
-			let chars[0] = 45;
+			let chars[0] = 45; //'-'
 			let i = 1;
 			let length = string.length() + 1;
 			while (i < length) {

@@ -56,13 +56,28 @@ class Math {
 	/** Returns the integer part of x/y. */
 	function int divide(int x, int y) {
 		var int q;
-		var int qy;
+		var int twiceY;
+
+		if (x < 0) {
+			if (y > 0) {
+				return -Math.divide(-x, y);
+			}
+			else { //y < 0
+				return Math.divide(-x, -y);
+			}
+		}
+		else { //x > 0
+			if (y < 0) {
+				return -Math.divide(x, -y);
+			}
+		}
 
 		if (y > x) { return 0; }
+		let twiceY = y + y;
+		if (twiceY < y) { return 1; } //x >= y; catch for overflow
 
 		let q = Math.divide(x, y + y);
-		let qy = q * y;
-		if ((x - (qy + qy)) < y) {
+		if ((x - (q * twiceY)) < y) {
 			return q + q;
 		}
 		else {
@@ -76,11 +91,13 @@ class Math {
 		var int root, newRoot;
 
 		let bit = 7; //16/2 - 1
-		while (bit) {
+		while (bit > -1) {
 			let bitmask = bitmasks[bit];
 			let newRoot = root + bitmask;
-			if (~((newRoot * newRoot) > x)) {
-				let root = newRoot;
+			if (newRoot < 182) { //prevent multiplication overflow
+				if (~((newRoot * newRoot) > x)) {
+					let root = newRoot;
+				}
 			}
 
 			let bit = bit - 1;
