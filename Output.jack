@@ -5,30 +5,27 @@
 
 /**
  * Handles writing characters to the screen.
- * The text screen (256 columns and 512 roes) is divided into 23 text rows (0..22),
+ * The text screen (256 columns and 512 rows) is divided into 23 text rows (0..22),
  * each containing 64 text columns (0..63).
  * Each row is 11 pixels high (including 1 space pixel), and 8 pixels wide
  * (including 2 space pixels).
  */
 class Output {
-
+	static int row, column;
 	// Character map for printing on the left of a screen word
 	static Array charMaps;
 
 	/** Initializes the screen and locates the cursor at the screen's top-left. */
 	function void init() {
-	}
-
-	// Initalizes the character map array
-	function void initMap() {
 		var int i;
 
-		let charMaps = Array.new(127);
+		let row = 0;
+		let column = 0;
 
+		let charMaps = Array.new(127);
 		// black square (used for non printable characters)
 		do Output.create(0,63,63,63,63,63,63,63,63,63,0);
-
-		// Assigns the bitmap for each character in the charachter set.
+		// Assigns the bitmap for each character in the character set.
 		do Output.create(32,0,0,0,0,0,0,0,0,0,0);          //
 		do Output.create(33,12,30,30,30,12,12,0,12,12,0);  // !
 		do Output.create(34,54,54,20,0,0,0,0,0,0,0);       // "
@@ -65,7 +62,7 @@ class Output {
 		do Output.create(64,30,51,51,59,59,59,27,3,30,0);  // @
 		do Output.create(63,30,51,51,24,12,12,0,12,12,0);  // ?
 
-		do Output.create(65,0,0,0,0,0,0,0,0,0,0);          // A ** TO BE FILLED **
+		do Output.create(65,12,30,51,51,63,51,51,51,51,0); // A ** TO BE FILLED **
 		do Output.create(66,31,51,51,51,31,51,51,51,31,0); // B
 		do Output.create(67,28,54,35,3,3,3,35,54,28,0);    // C
 		do Output.create(68,15,27,51,51,51,51,51,27,15,0); // D
@@ -155,42 +152,112 @@ class Output {
 		return;
 	}
 
-	// Returns the character map (array of size 11) for the given character
+	// Returns the character map (array of size 10) for the given character
 	// If an invalid character is given, returns the character map of a black square.
 	function Array getMap(char c) {
-
 		if ((c < 32) | (c > 126)) {
 			let c = 0;
 		}
-
 		return charMaps[c];
+	}
+
+	function void printCharNoAdvance(char c) {
+		var Array charMap;
+		var int rowPixels;
+		var int startX, startY;
+		var int x, y;
+
+		let charMap = Output.getMap(c);
+
+		let startX = column * 8;
+		let startY = row * 11;
+		while (y < 10) { //skip last row because it's blank
+			let rowPixels = charMap[y];
+			let x = 0;
+			while (x < 6) {
+				do Screen.setColor(~((rowPixels & Math.getBitmask(x)) = 0));
+				do Screen.drawPixel(startX + x, startY + y);
+
+				let x = x + 1;
+			}
+
+			let y = y + 1;
+		}
+		do Screen.setColor(false);
+		do Screen.drawRectangle(startX + 6, startY, startX + 7, startY + 10);
+		do Screen.drawRectangle(startX, startY + 10, startX + 5, startY + 10);
+		return;
 	}
 
 	/** Moves the cursor to the j’th column of the i’th row,
 	 *  and erases the character that was there. */
 	function void moveCursor(int i, int j) {
+		let row = i;
+		let column = j;
+		do Output.printCharNoAdvance(32); //' '
+		return;
 	}
 
 	/** Prints c at the cursor location and advances the cursor one
 	 *  column forward. */
 	function void printChar(char c) {
+		if (c = String.newLine()) {
+			do Output.println();
+			return;
+		}
+		if (c = String.backSpace()) {
+			do Output.backSpace();
+			return;
+		}
+
+		do Output.printCharNoAdvance(c);
+
+		if (column < 63) { //just go to the next column
+			let column = column + 1;
+		}
+		else { //overflow onto next row
+			do Output.println();
+		}
+		return;
 	}
 
 	/** Prints s starting at the cursor location, and advances the
 	 *  cursor appropriately. */
 	function void printString(String s) {
+		var int length;
+		var int i;
+
+		let length = s.length();
+		while (i < length) {
+			do Output.printChar(s.charAt(i));
+			let i = i + 1;
+		}
+		return;
 	}
 
 	/** Prints i starting at the cursor location, and advances the
 	 *  cursor appropriately. */
 	function void printInt(int i) {
+		var String s;
+
+		let s = String.new(6);
+		do s.setInt(i);
+		do Output.printString(s);
+		return;
 	}
 
 	/** Advances the cursor to the beginning of the next line. */
 	function void println() {
+		if (row < 22) { let row = row + 1; } //just go to next row
+		else { let row = 0; }
+		let column = 0;
+		return;
 	}
 
 	/** Moves the cursor one column back. */
 	function void backSpace() {
+		if (column > 0) { let column = column - 1; }
+		do Output.printCharNoAdvance(32); //' '
+		return;
 	}
 }
