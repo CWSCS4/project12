@@ -54,9 +54,7 @@ class Memory {
 		var int lostSize;
 
 		let segment = firstSegment;
-		while (segment) {
-			do Output.printInt(segment);
-			do Output.println();
+		while (~(segment = 0)) {
 			let length = Memory.getLength(segment);
 			if (~(length < size)) {
 				let lostSize = size + 2;
@@ -64,11 +62,11 @@ class Memory {
 				do Memory.setLength(nextSegment, length - lostSize);
 				do Memory.setNext(nextSegment, Memory.getNext(segment));
 				do Memory.setLength(segment, size);
-				if (previousSegment) {
-					do Memory.setNext(previousSegment, nextSegment);
-				}
-				else { //segment is the first segment
+				if (previousSegment = 0) { //segment is the first segment
 					let firstSegment = nextSegment;
+				}
+				else {
+					do Memory.setNext(previousSegment, nextSegment);
 				}
 				return segment;
 			}
@@ -87,11 +85,16 @@ class Memory {
 
 		let length = Memory.getLength(insertSegment);
 		let segment = firstSegment;
-		while (segment & (Memory.getLength(segment) < length)) {
+		while (~(segment = 0) & (Memory.getLength(segment) < length)) {
 			let previousSegment = segment;
 			let segment = Memory.getNext(segment);
 		}
-		do Memory.setNext(previousSegment, insertSegment);
+		if (previousSegment = 0) {
+			let firstSegment = insertSegment;
+		}
+		else {
+			do Memory.setNext(previousSegment, insertSegment);
+		}
 		do Memory.setNext(insertSegment, segment);
 		return;
 	}
