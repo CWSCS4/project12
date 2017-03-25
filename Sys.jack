@@ -31,7 +31,7 @@ class Sys {
 
 		while (i < duration) {
 			let j = 0;
-			while (j < 105) {
+			while (j < 400) {
 				let j = j + 1;
 			}
 			let i = i + 1;
