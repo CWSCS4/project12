@@ -55,8 +55,8 @@ class Math {
 
 	/** Returns the integer part of x/y. */
 	function int divide(int x, int y) {
-		var int q;
-		var int twiceY;
+		var Array twiceQY;
+		var int result;
 
 		if (x < 0) {
 			if (y > 0) {
@@ -72,15 +72,33 @@ class Math {
 			}
 		}
 
-		if (y > x) { return 0; }
-		let twiceY = y + y;
-		if (twiceY < y) { return 1; } //x >= y; catch for overflow
+		let twiceQY = Array.new(1);
+		let result = Math.divisionHelper(x, y, twiceQY);
+		do twiceQY.dispose();
+		return result;
+	}
 
-		let q = Math.divide(x, y + y);
-		if ((x - (q * twiceY)) < y) {
+	function int divisionHelper(int x, int y, Array twiceQY) { //twiceQY[0] stores the value of 2 * q * y for the divisionHelper() call that called this one - its q is whatever this one returns, and its y is half this one's y
+		var int q;
+		var int twiceY;
+
+		if (y > x) {
+			let twiceQY[0] = 0; //2 * 0 * (y / 2) = 0
+			return 0;
+		}
+		let twiceY = y + y;
+		if (twiceY < y) { //x >= y; catch for overflow of y
+			let twiceQY[0] = y; //2 * 1 * (y / 2) = y
+			return 1;
+		}
+
+		let q = Math.divisionHelper(x, y + y, twiceQY);
+		if ((x - twiceQY[0]) < y) {
+			//let twiceQY[0] = twiceQY[0]; (2 * (q + q) * (y / 2) = 2 * q * y)
 			return q + q;
 		}
 		else {
+			let twiceQY[0] = twiceQY[0] + y; //2 * (q + q + 1) * (y / 2) = (2q + 1) * y = 2 * q * y + y
 			return q + q + 1;
 		}
 	}
