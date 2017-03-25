@@ -7,34 +7,127 @@
  * Graphic screen library.
  */
 class Screen {
+	static boolean black;
 
-    /** Initializes the Screen. */
-    function void init() {
-    }
+	/** Initializes the Screen. */
+	function void init() {
+		let black = true;
+		return;
+	}
 
-    /** Erases the whole screen. */
-    function void clearScreen() {
-    }
+	/** Erases the whole screen. */
+	function void clearScreen() {
+		var int word;
 
-    /** Sets the color to be used in further draw commands
-     *  where white = false, black = true. */
-    function void setColor(boolean b) {
-    }
+		let word = 16384;
+		while (word < 24576) {
+			do Memory.poke(word, 0);
+			let word = word + 1;
+		}
+		return;
+	}
 
-    /** Draws the (x, y) pixel. */
-    function void drawPixel(int x, int y) {
-    }
+	/** Sets the color to be used in further draw commands
+	 *  where white = false, black = true. */
+	function void setColor(boolean b) {
+		let black = b;
+		return;
+	}
 
-    /** Draws a line from (x1, y1) to (x2, y2). */
-    function void drawLine(int x1, int y1, int x2, int y2) {
-    }
+	/** Draws the (x, y) pixel. */
+	function void drawPixel(int x, int y) {
+		var int screenIndex;
+		var int previousWord;
+		var int bitmask;
 
-    /** Draws a filled rectangle where the top left corner
-     *  is (x1, y1) and the bottom right corner is (x2, y2). */
-    function void drawRectangle(int x1, int y1, int x2, int y2) {
-    }
+		let screenIndex = 16384 + (y * 32) + (x / 16);
+		let previousWord = Memory.peek(screenIndex);
+		let bitmask = Math.getBitmask(Math.mod(x, 16));
 
-    /** Draws a filled circle of radius r around (cx, cy). */
-    function void drawCircle(int cx, int cy, int r) {
-    }
+		if (black) {
+			do Memory.poke(screenIndex, previousWord | bitmask);
+		}
+		else {
+			do Memory.poke(screenIndex, previousWord & ~bitmask);
+		}
+		return;
+	}
+
+	/** Draws a line from (x1, y1) to (x2, y2). */
+	function void drawLine(int x1, int y1, int x2, int y2) {
+		var int dx, dy;
+		var int sx, sy;
+		var int a, b;
+		var int x, y;
+		var int aDyMinusBDx;
+
+		let dx = Math.abs(x2 - x1);
+		let dy = Math.abs(y2 - y1);
+		let sx = Math.sgn(x2 - x1);
+		let sy = Math.sgn(y2 - y1);
+		let x = x1;
+		let y = y1;
+		while ((a < dx) | (b < dy)) {
+			do Screen.drawPixel(x, y);
+			if (aDyMinusBDx < 0) { //a/dx < b/dy
+				let a = a + 1;
+				let x = x + sx;
+				let aDyMinusBDx = aDyMinusBDx + dy;
+			}
+			else {
+				let b = b + 1;
+				let y = y + sy;
+				let aDyMinusBDx = aDyMinusBDx - dx;
+			}
+		}
+		return;
+	}
+
+	/** Draws a filled rectangle where the top left corner
+	 *  is (x1, y1) and the bottom right corner is (x2, y2). */
+	function void drawRectangle(int x1, int y1, int x2, int y2) {
+		var int x, y;
+		var int x2PlusOne, y2PlusOne;
+
+		let x2PlusOne = x2 + 1;
+		let y2PlusOne = y2 + 1;
+		let x = x1;
+		while (x < x2PlusOne) {
+			let y = y1;
+			while (y < y2PlusOne) {
+				do Screen.drawPixel(x, y);
+				let y = y + 1;
+			}
+
+			let x = x + 1;
+		}
+		return;
+	}
+
+	/** Draws a filled circle of radius r around (cx, cy). */
+	function void drawCircle(int cx, int cy, int r) {
+		var int rSquared;
+		var int x, y;
+		var int relativeX;
+		var int maxX, maxY;
+		var int h;
+
+		let rSquared = r * r;
+		let x = cx - r;
+		let relativeX = -r;
+		let maxX = cx + r + 1;
+		while (x < maxX) {
+			let h = Math.sqrt(rSquared - (relativeX * relativeX));
+			let y = cy - h;
+			let maxY = cy + h + 1;
+			while (y < maxY) {
+				do Screen.drawPixel(x, y);
+				let y = y + 1;
+			}
+
+			let x = x + 1;
+			let relativeX = relativeX + 1;
+		}
+		return;
+	}
 }

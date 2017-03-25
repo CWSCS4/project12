@@ -5,28 +5,128 @@
 
 /**
  * Memory operations library.
- */ 
+ */
 class Memory {
+	static Array firstSegment;
+	static Array memoryStart;
 
-    /** Initializes memory parameters. */
-    function void init() {
-    }
+	function void setLength(Array segment, int length) {
+		let segment[-2] = length;
+		return;
+	}
+	function void setNext(Array segment, Array nextSegment) {
+		let segment[-1] = nextSegment;
+		return;
+	}
+	function int getLength(Array segment) {
+		return segment[-2];
+	}
+	function Array getNext(Array segment) {
+		return segment[-1];
+	}
+	function boolean isFree(Array queriedSegment) {
+		var Array segment;
 
-    /** Returns the value of the main memory at the given address. */
-    function int peek(int address) {
-    }
+		let segment = firstSegment;
+		while (~(segment = null)) {
+			if (segment = queriedSegment) { return true; }
+			let segment = Memory.getNext(segment);
+		}
+		return false;
+	}
 
-    /** Sets the value of the main memory at this address
-     *  to the given value. */
-    function void poke(int address, int value) {
-    }
+	/** Initializes memory parameters. */
+	function void init() {
+		let memoryStart = 0;
+		let firstSegment = 2050; //start heap at 2048, so 2048 and 2049 are reserved for metadata
+		do Memory.setLength(firstSegment, 16384 - 2050); //heap goes until 16384, the start of the screen memory
+		do Memory.setNext(firstSegment, null);
+		return;
+	}
 
-    /** finds and allocates from the heap a memory block of the 
-     *  specified size and returns a reference to its base address. */
-    function int alloc(int size) {
-    }
+	/** Returns the value of the main memory at the given address. */
+	function int peek(int address) {
+		return memoryStart[address];
+	}
 
-    /** De-allocates the given object and frees its space. */
-    function void deAlloc(int object) {
-    }    
+	/** Sets the value of the main memory at this address
+	 *  to the given value. */
+	function void poke(int address, int value) {
+		let memoryStart[address] = value;
+		return;
+	}
+
+	/** finds and allocates from the heap a memory block of the
+	 *  specified size and returns a reference to its base address. */
+	function int alloc(int size) {
+		var Array previousSegment, segment, nextSegment;
+		var int length;
+		var int lostSize;
+
+		let lostSize = size + 2;
+		let segment = firstSegment;
+		while (~(segment = null)) {
+			let length = Memory.getLength(segment);
+			if (~(length < size)) {
+				if (length < (lostSize + 1)) { //no extra space to leave behind
+					let nextSegment = Memory.getNext(segment);
+				}
+				else { //extra space to leave behind
+					let nextSegment = segment + lostSize;
+					do Memory.setLength(nextSegment, length - lostSize);
+					do Memory.setNext(nextSegment, Memory.getNext(segment));
+					do Memory.setLength(segment, size);
+				}
+				if (previousSegment = null) { //segment is the first segment
+					let firstSegment = nextSegment;
+				}
+				else {
+					do Memory.setNext(previousSegment, nextSegment);
+				}
+				return segment;
+			}
+
+			let previousSegment = segment;
+			let segment = Memory.getNext(segment);
+		}
+		do Sys.error(6);
+		return null;
+	}
+
+	/** De-allocates the given object and frees its space. */
+	function void deAlloc(Array insertSegment) {
+		var Array previousSegment, segment, nextBlock;
+		var int length;
+
+		if (Memory.isFree(insertSegment)) { return; } //if segment is already free, do nothing
+
+		let length = Memory.getLength(insertSegment);
+		let nextBlock = insertSegment + length;
+		//If this is not the last block in the heap and the next block is also free, join them
+		if (~(nextBlock = 16384) & Memory.isFree(nextBlock)) {
+			let segment = firstSegment;
+			while (~(segment = nextBlock)) { //go until previousSegment is the segment pointing to nextBlock
+				let previousSegment = segment;
+				let segment = Memory.getNext(segment);
+			}
+			do Memory.setNext(previousSegment, Memory.getNext(segment)); //take nextBlock out of the free list
+			//Add metadata for next block and next block into this block
+			let length = length + 2 + Memory.getLength(nextBlock);
+			do Memory.setLength(insertSegment, length);
+		}
+
+		let segment = firstSegment;
+		while (~(segment = null) & (Memory.getLength(segment) < length)) {
+			let previousSegment = segment;
+			let segment = Memory.getNext(segment);
+		}
+		if (previousSegment = null) {
+			let firstSegment = insertSegment;
+		}
+		else {
+			do Memory.setNext(previousSegment, insertSegment);
+		}
+		do Memory.setNext(insertSegment, segment);
+		return;
+	}
 }
